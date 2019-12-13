@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html>
+<head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script>
+  $(document).ready(function(){
+    $("#bnew").click(function(){
+      $.get("new", function(data, status){
+          fillSquare(data);
+          for (let i = 0; i < 9; i++) {
+            for (let j = 0; j < 9; j++) {
+              square[i][j].disabled = square[i][j].value != " ";
+            }
+          }
+      })
+    });
+    
+    $("#breset").click(function(){
+      $.get("reset", function(data, status){
+             fillSquare(data);   
+      })
+    });
+
+    $("#bsol").click(function(){
+      $.get("solve", function(data, status){
+           fillSquare(data);   
+      })
+    });
+
+    $("#bmake").click(function(){
+        $.get("make", function(data, status){
+             fillSquare(data);   
+        })
+      });
+    
+    
+    $("#bundo").click(function(){
+        $.get("undo", function(data, status){
+             fillSquare(data);   
+        })
+      }); 
+    
+    $("#bredo").click(function(){
+        $.get("redo", function(data, status){
+             fillSquare(data);   
+        })
+      }); 
+    
+    $("#bgenerate").click(function(){
+        $.get("generate", function(data, status){
+            fillSquare(data);
+            for (let i = 0; i < 9; i++) {
+                 for (let j = 0; j < 9; j++) {
+                   square[i][j].disabled = square[i][j].value != " ";
+               }
+             }
+        })
+      }); 
+    
+    $(".square").keyup(function(){
+      let i = this.attributes.getNamedItem("row").value;
+      let j = this.attributes.getNamedItem("col").value;
+      let n = parseInt(this.value);
+      if (isNaN(n)) {
+    	  n = 0;
+      }
+      if (n <= 0 || n > 9) {
+    	  this.value = " ";
+    	  n = 0;
+      }
+      $.post("input", 
+      {
+           row: i,
+           col: j,
+           value: n
+      },
+      function(data, status){
+    	if (data == false) {
+       	    signalError(i, j); 	       
+        }
+       })
+    });
+    
+  });
+
+  function fillSquare(b) {
+    for (let i = 0; i < 9; i++) {
+      for (let j = 0; j < 9; j++) { 
+        let v = b[i][j];
+        if (v >= "1" && v <= "9") {
+          square[i][j].value = v;
+        }
+        else {
+          square[i][j].value = " ";
+        }
+      }
+    }
+  }
+  
+  function signalError(i, j) {
+	 square[i][j].style.backgroundColor = "red"; 
+	 setTimeout(function(i, j){
+	    	      square[i][j].style.backgroundColor = "white";
+	              square[i][j].value = " ";
+	    	    }, 1000, i, j);	  
+  }
+
+  </script>
+
+  <style>
+    div.knappar {
+      margin-left: 415px;
+    } 
+    div.rad1 {
+      margin-left: 105px;
+    } 
+    div.rad2 {
+      margin-left: 40px;
+    }
+    button {
+      font-size: 14px; 
+    }
+  </style> 
+</head>
+
+<body>
+<script>
+"use strict";
+let board = document.createElement("table");
+document.body.appendChild(board);
+board.style.borderCollapse = "collapse";
+board.style.marginLeft = "400px";
+board.style.marginTop = "100px";
+let square = new Array(9);
+for (let i=0; i<9; i++)
+  square[i] = new Array(9);
+
+for (let r = 0; r < 3; r++) {
+  let tr = document.createElement("tr");
+  board.appendChild(tr);
+  for (let k = 0; k < 3; k++) {
+    let a = document.createElement("td");
+    a.style.height = "120px";
+    a.style.width  = "120px";
+    a.style.borderStyle = "solid";
+    a.style.borderWidth = "thin";
+    a.style.borderColor = "blue";
+    tr.appendChild(a);
+    let ar = document.createElement("table");
+    a.appendChild(ar);
+    ar.style.borderCollapse = "collapse";
+    for (let i = 0; i < 3; i++) { 
+      let tr2 = document.createElement("tr");
+      ar.appendChild(tr2);     
+      for (let j = 0; j < 3; j++) {
+        let row = r*3 + i;
+        let col = k*3 + j;
+        let c = document.createElement("td");
+        c.style.height = "40px";
+        c.style.width  = "40px";
+        c.style.borderStyle = "solid";
+        c.style.borderWidth = "thin";
+        c.style.textAlign= "center"; 
+        tr2.appendChild(c);
+        let txt = document.createElement("input");
+        txt.style.width = c.style.width;
+        txt.style.height = c.style.height;
+        txt.style.textAlign = "center";
+        txt.style.fontSize = "16px";
+        txt.style.border = "none";
+        txt.className = "square";
+        c.appendChild(txt);
+        square[row][col] = txt;
+        let att = document.createAttribute("row");
+        att.value = row;
+        txt.attributes.setNamedItem(att);
+        att = document.createAttribute("col");
+        att.value = col;
+        txt.attributes.setNamedItem(att);
+      }
+    }
+  }
+}
+</script>
+<br>
+<div class="knappar">
+ <div class="rad1">
+  <button id="bnew">New</button>
+  <button id="breset">Reset</button>
+  <button id="bsol">Solve</button>
+  </div>
+  <br>
+  <div class="rad2">
+  <button id="bundo">Undo</button>
+  <button id="bredo">Redo</button>
+  <button id="bmake">Make solvable</button>
+  <button id="bgenerate">Generate</button>
+  </div>
+</div>
+</body>
+</html>
